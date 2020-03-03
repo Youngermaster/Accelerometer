@@ -21,6 +21,8 @@ class _IndexState extends State<Index> {
   double _accelerometerX;
   double _accelerometerY;
   double _accelerometerZ;
+  AccelerometerEvent accelerometerEvent;
+  StreamSubscription accelerometerSubscription;
 
   var stopwatch = new Stopwatch();
 
@@ -45,6 +47,12 @@ class _IndexState extends State<Index> {
     });
   }
 
+  @override
+  void dispose() {
+    accelerometerSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<File> _incrementCounter() {
     setState(() {
       _counter++;
@@ -53,13 +61,29 @@ class _IndexState extends State<Index> {
   }
 
   void _useAccelerometer() {
+    if (accelerometerSubscription == null) {
+      accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
+        setState(() {
+          accelerometerEvent = event;
+        });
+      });
+    } else {
+      // it has already ben created so just resume it
+      accelerometerSubscription.resume();
+    }
+    /*
     accelerometerEvents.listen((AccelerometerEvent event) {
       print("accelerometerEvents");
       _accelerometerX = event.x;
       _accelerometerY = event.y;
       _accelerometerZ = event.z;
       print(event);
-    });
+      print("${stopwatch.elapsedMilliseconds}");
+    });*/
+  }
+
+  void _pauseAccelerometer() {
+    
   }
 
   void _userAccelerometer() {
@@ -80,24 +104,6 @@ class _IndexState extends State<Index> {
             Text(
               'Button tapped $_counter time${_counter == 1 ? '' : 's'}.',
             ),
-            Container(
-              height: 200.0,
-              width: 200.0,
-              child: FittedBox(
-                child: FloatingActionButton(
-                  child: Center(
-                    child: Text("Start"),
-                  ),
-                  onPressed: () async {
-                    print("F");
-                    stopwatch.start();
-                    // await FlutterEmailSender.send(_email);
-                  },
-                  backgroundColor: Colors.red,
-                  elevation: 0,
-                ),
-              ),
-            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -111,9 +117,10 @@ class _IndexState extends State<Index> {
                       ),
                       onPressed: () async {
                         stopwatch.start();
+                        _useAccelerometer();
                       },
                       backgroundColor: Colors.green,
-                      elevation: 0,
+                      elevation: 10.0,
                     ),
                   ),
                 ),
@@ -128,9 +135,10 @@ class _IndexState extends State<Index> {
                       onPressed: () async {
                         stopwatch.stop();
                         print("${stopwatch.elapsedMilliseconds}");
+                        accelerometerSubscription.pause();
                       },
                       backgroundColor: Colors.red,
-                      elevation: 0,
+                      elevation: 10.0,
                     ),
                   ),
                 ),
@@ -145,9 +153,10 @@ class _IndexState extends State<Index> {
                       onPressed: () async {
                         stopwatch.stop();
                         stopwatch.reset();
+                        accelerometerSubscription.cancel();
                       },
                       backgroundColor: Colors.blue,
-                      elevation: 0,
+                      elevation: 10.0,
                     ),
                   ),
                 ),
@@ -156,10 +165,24 @@ class _IndexState extends State<Index> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          FloatingActionButton(
+            onPressed: () async => await FlutterEmailSender.send(_email),
+            tooltip: 'Share',
+            child: Icon(Icons.share),
+          ),
+          SizedBox(height: 8.0,),
+          FloatingActionButton(
+            onPressed: () => {
+              _incrementCounter,
+              print(accelerometerEvent)
+            },
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

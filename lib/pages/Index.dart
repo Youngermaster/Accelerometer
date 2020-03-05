@@ -18,9 +18,11 @@ class Index extends StatefulWidget {
 
 class _IndexState extends State<Index> {
   int _counter;
+  bool isRunning;
   double _accelerometerX;
   double _accelerometerY;
   double _accelerometerZ;
+
   AccelerometerEvent accelerometerEvent;
   StreamSubscription accelerometerSubscription;
 
@@ -62,7 +64,8 @@ class _IndexState extends State<Index> {
 
   void _useAccelerometer() {
     if (accelerometerSubscription == null) {
-      accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
+      accelerometerSubscription =
+          accelerometerEvents.listen((AccelerometerEvent event) {
         setState(() {
           accelerometerEvent = event;
         });
@@ -82,9 +85,7 @@ class _IndexState extends State<Index> {
     });*/
   }
 
-  void _pauseAccelerometer() {
-    
-  }
+  void _pauseAccelerometer() {}
 
   void _userAccelerometer() {
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
@@ -116,8 +117,21 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.play_arrow),
                       ),
                       onPressed: () async {
+                        isRunning = true;
                         stopwatch.start();
-                        _useAccelerometer();
+                        const oneSec = const Duration(seconds: 1);
+                        new Timer.periodic(
+                            oneSec,
+                            (Timer t) => {
+                                  if (isRunning)
+                                    {
+                                      _useAccelerometer(),
+                                      print(
+                                          'Working!, ${accelerometerEvent.toString()}'),
+                                    }
+                                  else
+                                    t.cancel()
+                                });
                       },
                       backgroundColor: Colors.green,
                       elevation: 10.0,
@@ -130,12 +144,16 @@ class _IndexState extends State<Index> {
                   child: FittedBox(
                     child: FloatingActionButton(
                       child: Center(
-                        child: Icon(Icons.stop),
+                        child: Icon(Icons.pause),
                       ),
                       onPressed: () async {
                         stopwatch.stop();
                         print("${stopwatch.elapsedMilliseconds}");
                         accelerometerSubscription.pause();
+
+                        isRunning = false;
+                        accelerometerSubscription.cancel();
+                        accelerometerSubscription = null;
                       },
                       backgroundColor: Colors.red,
                       elevation: 10.0,
@@ -153,7 +171,10 @@ class _IndexState extends State<Index> {
                       onPressed: () async {
                         stopwatch.stop();
                         stopwatch.reset();
+                        print("${stopwatch.elapsedMilliseconds}");
+                        isRunning = false;
                         accelerometerSubscription.cancel();
+                        accelerometerSubscription = null;
                       },
                       backgroundColor: Colors.blue,
                       elevation: 10.0,
@@ -173,12 +194,11 @@ class _IndexState extends State<Index> {
             tooltip: 'Share',
             child: Icon(Icons.share),
           ),
-          SizedBox(height: 8.0,),
+          SizedBox(
+            height: 8.0,
+          ),
           FloatingActionButton(
-            onPressed: () => {
-              _incrementCounter,
-              print(accelerometerEvent)
-            },
+            onPressed: _incrementCounter,
             tooltip: 'Increment',
             child: Icon(Icons.add),
           ),

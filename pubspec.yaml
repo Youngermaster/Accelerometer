@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flushbar: ^1.9.1
 
   sensors: ^0.4.1+8
   path_provider: ^1.6.1

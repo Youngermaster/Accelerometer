@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:sensors/sensors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:accelerometer/models/storage.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 
@@ -117,6 +118,12 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.play_arrow),
                       ),
                       onPressed: () async {
+                        Flushbar(
+                          flushbarPosition: FlushbarPosition.TOP,
+                          title: "Accelerometer",
+                          message: "Accelerometer Started",
+                          duration: Duration(seconds: 2),
+                        )..show(context);
                         isRunning = true;
                         stopwatch.start();
                         const oneSec = const Duration(seconds: 1);
@@ -147,6 +154,12 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.pause),
                       ),
                       onPressed: () async {
+                        Flushbar(
+                          flushbarPosition: FlushbarPosition.TOP,
+                          title: "Accelerometer",
+                          message: "Accelerometer Paused",
+                          duration: Duration(seconds: 2),
+                        )..show(context);
                         stopwatch.stop();
                         print("${stopwatch.elapsedMilliseconds}");
                         accelerometerSubscription.pause();
@@ -169,6 +182,12 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.refresh),
                       ),
                       onPressed: () async {
+                        Flushbar(
+                          flushbarPosition: FlushbarPosition.TOP,
+                          title: "Accelerometer",
+                          message: "Accelerometer Restarted",
+                          duration: Duration(seconds: 2),
+                        )..show(context);
                         stopwatch.stop();
                         stopwatch.reset();
                         print("${stopwatch.elapsedMilliseconds}");

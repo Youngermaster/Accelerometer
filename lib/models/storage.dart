@@ -12,7 +12,7 @@ class Storage {
     return File('$path/data.txt');
   }
 
-  Future<int> readCounter() async {
+  Future<int> readAccelerometer() async {
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
@@ -22,8 +22,14 @@ class Storage {
     }
   }
 
-  Future<File> writeCounter(int counter) async {
+  Future<File> writeAccelerometer(String counter) async {
     final file = await _localFile;
-    return file.writeAsString('$counter');
+    return file.writeAsString(counter, mode: FileMode.append);
+  }
+
+  
+  Future<File> flushDocument() async {
+    final file = await _localFile;
+    return file.writeAsString("", mode: FileMode.write, flush: true);
   }
 }

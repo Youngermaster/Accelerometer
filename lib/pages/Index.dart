@@ -43,11 +43,11 @@ class _IndexState extends State<Index> {
   @override
   void initState() {
     super.initState();
-    widget.storage.readCounter().then((int value) {
-      setState(() {
-        _counter = value;
-      });
-    });
+    // widget.storage.readCounter().then((int value) {
+    //   setState(() {
+    //     _counter = value;
+    //   });
+    // });
   }
 
   @override
@@ -56,12 +56,12 @@ class _IndexState extends State<Index> {
     super.dispose();
   }
 
-  Future<File> _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-    return widget.storage.writeCounter(_counter);
-  }
+  // Future<File> _incrementCounter() {
+  //   setState(() {
+  //     _counter++;
+  //   });
+  //   return widget.storage.writeCounter('$_counter');
+  // }
 
   void _useAccelerometer() {
     if (accelerometerSubscription == null) {
@@ -90,8 +90,8 @@ class _IndexState extends State<Index> {
 
   void _userAccelerometer() {
     userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      print("userAccelerometerEvents");
-      print(event);
+      // print("userAccelerometerEvents");
+      // print(event);
     });
   }
 
@@ -103,8 +103,31 @@ class _IndexState extends State<Index> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text(
-              'Button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
+                  'ELAPSED TIME',
+                  style: TextStyle(
+                    fontSize: 35.0,
+                  ),
+                ),
+                SizedBox(
+                  height: 15.0,
+                ),
+                Text(
+                  'Seconds: ${stopwatch.elapsedMilliseconds ~/ 1000}',
+                  style: TextStyle(
+                    fontSize: 15.0,
+                  ),
+                ),
+                Text(
+                  'Milliseconds: ${stopwatch.elapsedMilliseconds}',
+                  style: TextStyle(
+                    fontSize: 15.0,
+                  ),
+                ),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -126,15 +149,15 @@ class _IndexState extends State<Index> {
                         )..show(context);
                         isRunning = true;
                         stopwatch.start();
-                        const oneSec = const Duration(seconds: 1);
+                        const oneSec = const Duration(milliseconds: 1);
                         new Timer.periodic(
                             oneSec,
                             (Timer t) => {
                                   if (isRunning)
                                     {
                                       _useAccelerometer(),
-                                      print(
-                                          'Working!, ${accelerometerEvent.toString()}'),
+                                      widget.storage.writeAccelerometer(
+                                          '${accelerometerEvent.x},${accelerometerEvent.y},${accelerometerEvent.z},${stopwatch.elapsedMilliseconds}\n')
                                     }
                                   else
                                     t.cancel()
@@ -161,12 +184,10 @@ class _IndexState extends State<Index> {
                           duration: Duration(seconds: 2),
                         )..show(context);
                         stopwatch.stop();
-                        print("${stopwatch.elapsedMilliseconds}");
                         accelerometerSubscription.pause();
-
                         isRunning = false;
-                        accelerometerSubscription.cancel();
-                        accelerometerSubscription = null;
+                        // accelerometerSubscription.cancel();
+                        // accelerometerSubscription = null;
                       },
                       backgroundColor: Colors.red,
                       elevation: 10.0,
@@ -188,9 +209,11 @@ class _IndexState extends State<Index> {
                           message: "Accelerometer Restarted",
                           duration: Duration(seconds: 2),
                         )..show(context);
-                        stopwatch.stop();
-                        stopwatch.reset();
-                        print("${stopwatch.elapsedMilliseconds}");
+                        setState(() {
+                          stopwatch.stop();
+                          stopwatch.reset();
+                        });
+                        await widget.storage.flushDocument();
                         isRunning = false;
                         accelerometerSubscription.cancel();
                         accelerometerSubscription = null;
@@ -205,23 +228,13 @@ class _IndexState extends State<Index> {
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            onPressed: () async => await FlutterEmailSender.send(_email),
-            tooltip: 'Share',
-            child: Icon(Icons.share),
-          ),
-          SizedBox(
-            height: 8.0,
-          ),
-          FloatingActionButton(
-            onPressed: _incrementCounter,
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async => {
+          await FlutterEmailSender.send(_email),
+          await widget.storage.flushDocument(),
+        },
+        tooltip: 'Share',
+        child: Icon(Icons.share),
       ),
     );
   }

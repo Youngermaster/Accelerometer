@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:async';
 import 'package:sensors/sensors.dart';
 import 'package:flutter/material.dart';
@@ -18,16 +17,13 @@ class Index extends StatefulWidget {
 }
 
 class _IndexState extends State<Index> {
-  int _counter;
+  int peridiocity;
   bool isRunning;
-  double _accelerometerX;
-  double _accelerometerY;
-  double _accelerometerZ;
 
   AccelerometerEvent accelerometerEvent;
   StreamSubscription accelerometerSubscription;
 
-  var stopwatch = new Stopwatch();
+  var stopwatch;
 
   final Email _email = Email(
     body: 'Accelerometer data',
@@ -43,11 +39,11 @@ class _IndexState extends State<Index> {
   @override
   void initState() {
     super.initState();
-    // widget.storage.readCounter().then((int value) {
-    //   setState(() {
-    //     _counter = value;
-    //   });
-    // });
+    setState(() {
+      isRunning = false;
+      stopwatch = new Stopwatch();
+      peridiocity = 1;
+    });
   }
 
   @override
@@ -55,13 +51,6 @@ class _IndexState extends State<Index> {
     accelerometerSubscription?.cancel();
     super.dispose();
   }
-
-  // Future<File> _incrementCounter() {
-  //   setState(() {
-  //     _counter++;
-  //   });
-  //   return widget.storage.writeCounter('$_counter');
-  // }
 
   void _useAccelerometer() {
     if (accelerometerSubscription == null) {
@@ -75,58 +64,92 @@ class _IndexState extends State<Index> {
       // it has already ben created so just resume it
       accelerometerSubscription.resume();
     }
-    /*
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      print("accelerometerEvents");
-      _accelerometerX = event.x;
-      _accelerometerY = event.y;
-      _accelerometerZ = event.z;
-      print(event);
-      print("${stopwatch.elapsedMilliseconds}");
-    });*/
   }
 
-  void _pauseAccelerometer() {}
-
-  void _userAccelerometer() {
-    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      // print("userAccelerometerEvents");
-      // print(event);
-    });
+  Future<int> createAlertDialog(BuildContext context) {
+    TextEditingController customController = TextEditingController();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Periodicity'),
+            content: TextField(
+              controller: customController,
+            ),
+            actions: <Widget>[
+              MaterialButton(
+                elevation: 5.0,
+                child: Text('Submit'),
+                onPressed: () {
+                  Navigator.of(context)
+                      .pop(int.parse(customController.text.toString().trim()));
+                },
+              )
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+        title: Text(
+          widget.title,
+          style: TextStyle(color: Colors.red),
+        ),
+        backgroundColor: Colors.grey[900],
+        centerTitle: true,
+      ),
+      backgroundColor: Colors.grey[800],
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  'ELAPSED TIME',
-                  style: TextStyle(
-                    fontSize: 35.0,
-                  ),
-                ),
-                SizedBox(
-                  height: 15.0,
+                  'Elapsed time',
+                  style: TextStyle(fontSize: 35.0, color: Colors.white),
                 ),
                 Text(
                   'Seconds: ${stopwatch.elapsedMilliseconds ~/ 1000}',
-                  style: TextStyle(
-                    fontSize: 15.0,
-                  ),
+                  style: TextStyle(fontSize: 15.0, color: Colors.white),
                 ),
+              ],
+            ),
+            Column(
+              children: <Widget>[
                 Text(
-                  'Milliseconds: ${stopwatch.elapsedMilliseconds}',
-                  style: TextStyle(
-                    fontSize: 15.0,
-                  ),
+                  "Periodicity",
+                  style: TextStyle(fontSize: 35.0, color: Colors.white),
                 ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Text(
+                        "$peridiocity milliseconds",
+                        style: TextStyle(fontSize: 15.0, color: Colors.white),
+                      ),
+                      FlatButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0)),
+                        color: Colors.red,
+                        textColor: Colors.white,
+                        onPressed: () {
+                          createAlertDialog(context).then((onValue) {
+                            setState(() {
+                              peridiocity = onValue;
+                            });
+                          });
+                        },
+                        child: Text(
+                          "Change",
+                          style: TextStyle(fontSize: 15.0, color: Colors.white),
+                        ),
+                      )
+                    ]),
               ],
             ),
             Row(
@@ -141,17 +164,10 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.play_arrow),
                       ),
                       onPressed: () async {
-                        Flushbar(
-                          flushbarPosition: FlushbarPosition.TOP,
-                          title: "Accelerometer",
-                          message: "Accelerometer Started",
-                          duration: Duration(seconds: 2),
-                        )..show(context);
                         isRunning = true;
                         stopwatch.start();
-                        const oneSec = const Duration(milliseconds: 1);
                         new Timer.periodic(
-                            oneSec,
+                            Duration(milliseconds: peridiocity),
                             (Timer t) => {
                                   if (isRunning)
                                     {
@@ -162,8 +178,15 @@ class _IndexState extends State<Index> {
                                   else
                                     t.cancel()
                                 });
+
+                        Flushbar(
+                          flushbarPosition: FlushbarPosition.TOP,
+                          title: "Accelerometer",
+                          message: "Accelerometer Started",
+                          duration: Duration(seconds: 2),
+                        )..show(context);
                       },
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.red,
                       elevation: 10.0,
                     ),
                   ),
@@ -177,17 +200,17 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.pause),
                       ),
                       onPressed: () async {
+                        stopwatch.stop();
+                        accelerometerSubscription.pause();
+                        isRunning = false;
+                        // accelerometerSubscription.cancel();
+                        // accelerometerSubscription = null;
                         Flushbar(
                           flushbarPosition: FlushbarPosition.TOP,
                           title: "Accelerometer",
                           message: "Accelerometer Paused",
                           duration: Duration(seconds: 2),
                         )..show(context);
-                        stopwatch.stop();
-                        accelerometerSubscription.pause();
-                        isRunning = false;
-                        // accelerometerSubscription.cancel();
-                        // accelerometerSubscription = null;
                       },
                       backgroundColor: Colors.red,
                       elevation: 10.0,
@@ -203,12 +226,6 @@ class _IndexState extends State<Index> {
                         child: Icon(Icons.refresh),
                       ),
                       onPressed: () async {
-                        Flushbar(
-                          flushbarPosition: FlushbarPosition.TOP,
-                          title: "Accelerometer",
-                          message: "Accelerometer Restarted",
-                          duration: Duration(seconds: 2),
-                        )..show(context);
                         setState(() {
                           stopwatch.stop();
                           stopwatch.reset();
@@ -217,8 +234,14 @@ class _IndexState extends State<Index> {
                         isRunning = false;
                         accelerometerSubscription.cancel();
                         accelerometerSubscription = null;
+                        Flushbar(
+                          flushbarPosition: FlushbarPosition.TOP,
+                          title: "Accelerometer",
+                          message: "Accelerometer Restarted",
+                          duration: Duration(seconds: 2),
+                        )..show(context);
                       },
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.red,
                       elevation: 10.0,
                     ),
                   ),
@@ -230,8 +253,24 @@ class _IndexState extends State<Index> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async => {
-          await FlutterEmailSender.send(_email),
-          await widget.storage.flushDocument(),
+          if (!isRunning)
+            {
+              await FlutterEmailSender.send(_email),
+              await widget.storage.flushDocument(),
+            }
+          else
+            {
+              Flushbar(
+                flushbarPosition: FlushbarPosition.TOP,
+                title: "Accelerometer",
+                message: "The accelerometer is running",
+                icon: Icon(
+                  Icons.warning,
+                  color: Colors.red,
+                ),
+                duration: Duration(seconds: 2),
+              )..show(context)
+            }
         },
         tooltip: 'Share',
         child: Icon(Icons.share),

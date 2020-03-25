@@ -27,7 +27,6 @@ class Storage {
     return file.writeAsString(counter, mode: FileMode.append);
   }
 
-  
   Future<File> flushDocument() async {
     final file = await _localFile;
     return file.writeAsString("", mode: FileMode.write, flush: true);

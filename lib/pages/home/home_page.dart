@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                       Opacity(
                           opacity: animation.titleOpacity.value,
                           child: placeholderBoxTitle(
-                              28, 150, Alignment.centerLeft, "pause")),
+                              28, 100, Alignment.centerLeft, "pause")),
                     ],
                   ),
                   Column(
@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                       Opacity(
                           opacity: animation.titleOpacity.value,
                           child: placeholderBoxTitle(
-                              28, 150, Alignment.centerLeft, "restart")),
+                              28, 100, Alignment.centerLeft, "restart")),
                     ],
                   ),
                 ],
@@ -224,7 +224,7 @@ class _HomePageState extends State<HomePage> {
                 )..show(context);
               },
               backgroundColor: Colors.red.shade700,
-              elevation: 10.0,
+              elevation: 30.0,
             ),
           ),
         ),
@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage> {
             )..show(context);
           },
           backgroundColor: Colors.red,
-          elevation: 10.0,
+          elevation: 20.0,
         ),
       ),
     );
@@ -287,7 +287,7 @@ class _HomePageState extends State<HomePage> {
             )..show(context);
           },
           backgroundColor: Colors.red,
-          elevation: 10.0,
+          elevation: 20.0,
         ),
       ),
     );
@@ -396,7 +396,7 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: <Widget>[
               MaterialButton(
-                elevation: 5.0,
+                elevation: 25.0,
                 child: Text('Submit'),
                 onPressed: () {
                   try {

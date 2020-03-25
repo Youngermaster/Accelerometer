@@ -1,6 +1,7 @@
-import 'package:accelerometer/pages/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
+import 'package:accelerometer/models/storage.dart';
+import 'package:accelerometer/pages/home/home_page.dart';
 
 class HomePageAnimator extends StatefulWidget {
   @override
@@ -29,6 +30,7 @@ class _HomePageAnimatorState extends State<HomePageAnimator>
   Widget build(BuildContext context) {
     return HomePage(
       controller: _controller,
+      storage: Storage()
     );
   }
 }

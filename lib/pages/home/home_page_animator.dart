@@ -28,9 +28,6 @@ class _HomePageAnimatorState extends State<HomePageAnimator>
 
   @override
   Widget build(BuildContext context) {
-    return HomePage(
-      controller: _controller,
-      storage: Storage()
-    );
+    return HomePage(controller: _controller, storage: Storage());
   }
 }
